@@ -13,9 +13,9 @@ echo -n " Ports : "
 nmap -sS -p- -iL ip.txt >> ports.txt
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
 cat pl.txt
-echo -n " Version Scan"
 
 for port in $(cat pl.txt);do 
+	echo -n " Version Scan"
 	nmap -sS -sV -p $port -iL ip.txt >> version.txt
 	echo " . . . . . . Done"
 	echo -n " Aggressive Scan"
