@@ -16,7 +16,7 @@ cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
 cat pl.txt
 echo -n " UDP Ports : "
 ################################################################ Get UDP
-nmap -sU -p- -iL ip.txt >> udp.txt
+nmap -sU -iL ip.txt >> udp.txt
 cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
 cat upl.txt
 ################################################################ Basic Nmap Scans
@@ -101,3 +101,4 @@ rm pl.txt
 rm smbtemp.txt
 rm smtptemp.txt
 echo "###############     COMPLETE     ###############"
+echo "Reminder: UDP port scan was all common ports, not all ports"
