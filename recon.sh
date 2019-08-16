@@ -1,25 +1,25 @@
 #!/bin/bash
-########################################################################## Get Data
+################################################################ Get Data
 read -p "Enter Machine Name: " machine
 mkdir $machine
 cd $machine
 read -p "What is the IP: " ip
 echo $ip > ip.txt
-########################################################################## Start Scans
+################################################################ Start Scans
 echo "###############     STARTING     ###############"
 echo " Machine : $machine"
 echo -n " IP : " && cat ip.txt
 echo -n " TCP Ports : " 
-########################################################################## Get TCP
+################################################################ Get TCP
 nmap -sS -p- -iL ip.txt >> ports.txt
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
 cat pl.txt
 echo -n " UDP Ports : "
-########################################################################## Get UDP
+################################################################ Get UDP
 nmap -sU -p- -iL ip.txt >> udp.txt
 cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
 cat upl.txt
-########################################################################## Basic Nmap Scans
+################################################################ Basic Nmap Scans
 for port in $(cat pl.txt);do 
 	echo "     .:TCP Start:.     "
 	echo -n " Version Scan"
@@ -38,7 +38,7 @@ for port in $(cat pl.txt);do
 	nmap -p $port --script vuln -iL ip.txt >> vuln.txt
 	echo " . . . Done";
 done
-########################################################################## HTTP Scans
+################################################################ HTTP Scans
 cat ports.txt | grep http | cut -d / -f 1 >> httptmp.txt
 for ps in $(cat httptmp.txt); do
 	if [ $ps != "" ]
@@ -56,7 +56,7 @@ for ps in $(cat httptmp.txt); do
 		echo " . . . . . . . . . . Done"
 	fi;
 done
-########################################################################## Find SMB/SMTP 
+################################################################ Find SMB/SMTP 
 for ps in $(cat ports.txt | grep tcp | cut -d / -f 1);do
 	if [ $ps = "25" ] || [ $ps = "465" ] || [ $ps = "587" ] || [ $ps = "2525" ]
 	then
@@ -66,7 +66,7 @@ for ps in $(cat ports.txt | grep tcp | cut -d / -f 1);do
 		echo $ps >> smbtempt.txt
 	fi;
 done
-########################################################################## SMTP Enum
+################################################################ SMTP Enum
 if [ -e smtptemp.txt ]
 then
 	cat smtptemp.txt | xargs | sed -e 's/ /,/g' >> smtpports.txt
@@ -79,7 +79,7 @@ then
 		echo " . . . . . . . . . . Done";
 	done
 fi
-########################################################################## SMB Enum
+################################################################ SMB Enum
 if [ -e smbtempt.txt ]
 then
 	cat smbtemp.txt | xargs | sed -e 's/ /,/g' >> smbports.txt
@@ -96,7 +96,7 @@ then
 		echo " . . . . . . . Done";
 	done
 fi
-########################################################################## Clean Up
+################################################################ Clean Up
 rm pl.txt
 rm smbtemp.txt
 rm smtptemp.txt
