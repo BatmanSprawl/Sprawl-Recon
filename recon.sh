@@ -24,31 +24,36 @@ echo -n " TCP Ports : "
 prog & nmap -sS -p- -iL ip.txt >> ports.txt
 kill "$!" && printf "\b "
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
-cat pl.txt
+print pl.txt
 ################################################################ Get UDP
 #echo -n " UDP Ports : "
 #prog & nmap -sU -iL ip.txt >> udp.txt
 #kill "$!" && printf "\b "
 #cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
-#cat upl.txt
+#print upl.txt
 ################################################################ Basic Nmap Scans
 for port in $(cat pl.txt);do 
 	echo "     .:TCP Start:.     "
 	echo -n " Version Scan"
 	prog & nmap -sS -sV -p $port -iL ip.txt >> version.txt
-	kill "$!" && print "\b . . . . . . Done"
+	kill "$!" && printf "\b "
+	echo ". . . . . . Done"
 	echo -n " Aggressive Scan"
 	prog & nmap -A -iL ip.txt >> aggro.txt
-	kill "$!" && print "\b. . . . . Done"
+	kill "$!" && printf "\b "
+	echo ". . . . . Done"
 	echo -n " OS Scan"
 	prog & nmap -O -p $port -iL ip.txt >> os.txt
-	kill "$!" && print "\b . . . . . . . . Done"
+	kill "$!" && printf "\b "
+	echo ". . . . . . . . Done"
 	echo -n " Standard Scan"
 	prog & nmap -sC -iL ip.txt >> standscan.txt
-	kill "$!" && print "\b. . . . . . Done"
+	kill "$!" && printf "\b "
+	echo ". . . . . . Done"
 	echo -n " Vulnerability Scan"
 	prog & nmap -p $port --script vuln -iL ip.txt >> vuln.txt
-	kill "$!" && print "\b . . . Done";
+	kill "$!" && printf "\b "
+	echo ". . . Done";
 done
 ################################################################ HTTP Scans
 cat ports.txt | grep tcp | grep http | cut -d / -f 1 >> httptmp.txt
@@ -59,13 +64,16 @@ for ps in $(cat httptmp.txt); do
 		echo " Http Scans Starting"
 		echo -n " Nmap"
 		prog & nmap --script http-enum -T 4 $ip >> http-enum-$ps.txt
-		kill "$!" && print "\b . . . . . . . . . . Done" 
+		kill "$!" && print "\b "
+		echo ". . . . . . . . . . Done" 
 		echo -n " Nikto"
 		prog & nikto -h http://$ip >> nikto-basic-$ps.txt
-		echo "\b. . . . . . . . . . Done"
+		kill "$!" && print "\b "
+		echo ". . . . . . . . . . Done"
 		echo -n " Dirb"
 		prog & dirb http://$ip/ >> dirb-basic-$ps.txt
-		kill "$!" && print "\b . . . . . . . . . . Done"
+		kill "$!" && print "\b "
+		echo ". . . . . . . . . . Done"
 	fi;
 done
 ################################################################ Find SMB/SMTP 
@@ -89,7 +97,8 @@ then
 		prog & nmap --script smtp-enum-users -p $smtp $ip >> smtp-enum-users.txt
 		kill "$!"
 		prog & nmap --script smbtp-commands -p $smtp $ip >> smtp-commands.txt
-		kill "$!" && print "\b\b . . . . . . . . . . Done";
+		kill "$!" && printf "\b\b  "
+		echo ". . . . . . . . . . Done";
 	done
 fi
 ################################################################ SMB Enum
@@ -105,10 +114,12 @@ then
 		prog & nmap --script smb-os-discovery -p $smb $ip >> smb-os.txt
 		kill "$!"
 		prog & nmap --script smb-security-mode -p $smb $ip >> smb-security.txt
-		kill "$!" && print "\b\b\b . . . . . . . . . . Done"
+		kill "$!" && print "\b\b\b   "
+		echo ". . . . . . . . . . Done"
 		echo -n " Enum4linux"
 		prog & enum4linux $ip >> enum4linux.txt
-		kill "$!" && print "\b . . . . . . . Done";
+		kill "$!" && print "\b "
+		echo ". . . . . . . Done";
 	done
 fi
 ################################################################ Clean Up
