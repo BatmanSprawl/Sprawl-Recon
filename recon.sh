@@ -9,12 +9,17 @@ echo "###############     STARTING     ###############"
 
 echo " Machine : $machine"
 echo -n " IP : " && cat ip.txt
-echo -n " Ports : " 
+echo -n " TCP Ports : " 
 nmap -sS -p- -iL ip.txt >> ports.txt
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
 cat pl.txt
+nmap -sU -p- -iL ip.txt >> udp.txt
+echo -n " UDP Ports : "
+cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
+cat upl.txt
 
 for port in $(cat pl.txt);do 
+	echo "     .:TCP Start:.     "
 	echo -n " Version Scan"
 	nmap -sS -sV -p $port -iL ip.txt >> version.txt
 	echo " . . . . . . Done"
@@ -23,7 +28,7 @@ for port in $(cat pl.txt);do
 	echo ". . . . . Done"
 	echo -n " OS Scan"
 	nmap -O -p $port -iL ip.txt >> os.txt
-	echo ". . . . . . . . . Done"
+	echo " . . . . . . . . Done"
 	echo -n " Standard Scan"
 	nmap -sC -iL ip.txt >> standscan.txt
 	echo ". . . . . . Done"
@@ -88,5 +93,7 @@ then
 fi
 
 rm pl.txt
+
+
 
 echo "###############     COMPLETE     ###############"
