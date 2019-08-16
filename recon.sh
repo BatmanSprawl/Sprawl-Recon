@@ -34,8 +34,8 @@ for port in $(cat pl.txt);do
 	echo ". . . . . . Done"
 	echo -n " Vulnerability Scan"
 	nmap -p $port --script vuln -iL ip.txt >> vuln.txt
-	echo " . . . Done"
-;done
+	echo " . . . Done";
+done
 
 for ps in $(cat ports.txt | grep http | cut -d / -f 1);do
 	if [ $ps != "" ]
@@ -57,8 +57,8 @@ for ps in $(cat ports.txt | grep http | cut -d / -f 1);do
 	elif [ $ps = "139" ] || [ $ps = "445" ]
 	then
 		echo $ps >> smbtempt.txt
-	fi
-;done
+	fi;
+done
 
 if [ -e smtptemp.txt ]
 then
@@ -69,12 +69,12 @@ then
 		echo -n " Nmap"
 		nmap --script smtp-enum-users -p $smtp $ip >> smtp-enum-users.txt
 		nmap --script smbtp-commands -p $smtp $ip >> smtp-commands.txt
-		echo " . . . . . . . . . . Done"
-	;done
+		echo " . . . . . . . . . . Done";
+	done
 	rm smtptemp.txt
 fi
 
-if [ -e smbtempt.txt]
+if [ -e smbtempt.txt ]
 then
 	cat smbtemp.txt | xargs | sed -e 's/ /,/g' >> smbports.txt
 	for smb in $(cat smbports.txt);do
@@ -87,13 +87,11 @@ then
 		echo " . . . . . . . . . . Done"
 		echo -n " Enum4linux"
 		enum4linux $ip >> enum4linux.txt
-		echo " . . . . . . . Done"
-	;done
+		echo " . . . . . . . Done";
+	done
 	rm smbtempt.txt
 fi
 
 rm pl.txt
-
-
 
 echo "###############     COMPLETE     ###############"
