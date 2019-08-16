@@ -1,4 +1,14 @@
 #!/bin/bash
+################################################################ Progress
+prog() {
+	local i sp n
+	sp='/-\|'
+	n=${#sp}
+	printf ' '
+	while sleep 0.1; do
+		printf "%s\b" "${sp:i++%n:1}"
+	done
+}
 ################################################################ Get Data
 read -p "Enter Machine Name: " machine
 mkdir $machine
@@ -11,32 +21,34 @@ echo " Machine : $machine"
 echo -n " IP : " && cat ip.txt
 echo -n " TCP Ports : " 
 ################################################################ Get TCP
-nmap -sS -p- -iL ip.txt >> ports.txt
+prog & nmap -sS -p- -iL ip.txt >> ports.txt
+kill "$!" && printf "\b "
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
 cat pl.txt
-echo -n " UDP Ports : "
 ################################################################ Get UDP
-nmap -sU -iL ip.txt >> udp.txt
-cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
-cat upl.txt
+#echo -n " UDP Ports : "
+#prog & nmap -sU -iL ip.txt >> udp.txt
+#kill "$!" && printf "\b "
+#cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
+#cat upl.txt
 ################################################################ Basic Nmap Scans
 for port in $(cat pl.txt);do 
 	echo "     .:TCP Start:.     "
 	echo -n " Version Scan"
-	nmap -sS -sV -p $port -iL ip.txt >> version.txt
-	echo " . . . . . . Done"
+	prog & nmap -sS -sV -p $port -iL ip.txt >> version.txt
+	kill "$!" && printf "\b . . . . . . Done"
 	echo -n " Aggressive Scan"
-	nmap -A -iL ip.txt >> aggro.txt
-	echo ". . . . . Done"
+	prog & nmap -A -iL ip.txt >> aggro.txt
+	kill "$!" && printf "\b. . . . . Done"
 	echo -n " OS Scan"
-	nmap -O -p $port -iL ip.txt >> os.txt
-	echo " . . . . . . . . Done"
+	prog & nmap -O -p $port -iL ip.txt >> os.txt
+	kill "$!" && printf "\b . . . . . . . . Done"
 	echo -n " Standard Scan"
-	nmap -sC -iL ip.txt >> standscan.txt
-	echo ". . . . . . Done"
+	prog & nmap -sC -iL ip.txt >> standscan.txt
+	kill "$!" && printf "\b. . . . . . Done"
 	echo -n " Vulnerability Scan"
-	nmap -p $port --script vuln -iL ip.txt >> vuln.txt
-	echo " . . . Done";
+	prog & nmap -p $port --script vuln -iL ip.txt >> vuln.txt
+	kill "$!" && printf "\b . . . Done";
 done
 ################################################################ HTTP Scans
 cat ports.txt | grep tcp | grep http | cut -d / -f 1 >> httptmp.txt
@@ -46,14 +58,14 @@ for ps in $(cat httptmp.txt); do
 		echo "      .:Http Port Found:.      "
 		echo " Http Scans Starting"
 		echo -n " Nmap"
-		nmap --script http-enum -T 4 $ip >> http-enum-$ps.txt
-		echo " . . . . . . . . . . Done" 
+		prog & nmap --script http-enum -T 4 $ip >> http-enum-$ps.txt
+		kill "$!" && printf "\b . . . . . . . . . . Done" 
 		echo -n " Nikto"
-		nikto -h http://$ip >> nikto-basic-$ps.txt
-		echo ". . . . . . . . . . Done"
+		prog & nikto -h http://$ip >> nikto-basic-$ps.txt
+		echo "\b. . . . . . . . . . Done"
 		echo -n " Dirb"
-		dirb http://$ip/ >> dirb-basic-$ps.txt
-		echo " . . . . . . . . . . Done"
+		prog & dirb http://$ip/ >> dirb-basic-$ps.txt
+		kill "$!" && printf "\b . . . . . . . . . . Done"
 	fi;
 done
 ################################################################ Find SMB/SMTP 
@@ -74,9 +86,9 @@ then
 		echo "      .:SMTP Ports Found:.     "
 		echo " SMTP Scans Starting"
 		echo -n " Nmap"
-		nmap --script smtp-enum-users -p $smtp $ip >> smtp-enum-users.txt
-		nmap --script smbtp-commands -p $smtp $ip >> smtp-commands.txt
-		echo " . . . . . . . . . . Done";
+		prog & nmap --script smtp-enum-users -p $smtp $ip >> smtp-enum-users.txt
+		prog & nmap --script smbtp-commands -p $smtp $ip >> smtp-commands.txt
+		kill "$!" && printf "\b\b . . . . . . . . . . Done";
 	done
 fi
 ################################################################ SMB Enum
@@ -87,13 +99,13 @@ then
 		echo "      .:SMB Ports Found:.     "
 		echo " SMB Scans Starting"
 		echo -n " Nmap"
-		nmap --script smb-enum-users -p $smb $ip >> smb-users.txt
-		nmap --script smb-os-discovery -p $smb $ip >> smb-os.txt
-		nmap --script smb-security-mode -p $smb $ip >> smb-security.txt
-		echo " . . . . . . . . . . Done"
+		prog & nmap --script smb-enum-users -p $smb $ip >> smb-users.txt
+		prog & nmap --script smb-os-discovery -p $smb $ip >> smb-os.txt
+		prog & nmap --script smb-security-mode -p $smb $ip >> smb-security.txt
+		kill "$!" && printf "\b\b\b . . . . . . . . . . Done"
 		echo -n " Enum4linux"
-		enum4linux $ip >> enum4linux.txt
-		echo " . . . . . . . Done";
+		prog & enum4linux $ip >> enum4linux.txt
+		kill "$!" && printf "\b . . . . . . . Done";
 	done
 fi
 ################################################################ Clean Up
@@ -102,3 +114,4 @@ rm smbtemp.txt
 rm smtptemp.txt
 echo "###############     COMPLETE     ###############"
 echo "Reminder: UDP port scan was all common ports, not all ports"
+echo "Note: UDP is currently commented OUT"
