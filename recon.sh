@@ -122,7 +122,7 @@ then
 		echo ". . . . . . . . . . Done"
 		echo -n " Enum4linux"
 		prog & enum4linux $ip >> enum4linux.txt
-		kill "$!" && print "\b"
+		kill "$!" && printf "\b"
 		echo ". . . . . . . Done";
 	done
 	rm smbtemp.txt
