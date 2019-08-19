@@ -36,25 +36,26 @@ for port in $(cat pl.txt);do
 	echo "     .:TCP Start:.     "
 	echo -n " Version Scan"
 	prog & nmap -sS -sV -p $port -iL ip.txt >> version.txt
-	kill "$!" && printf "\b "
+	kill "$!" && printf "\b"
 	echo ". . . . . . Done"
 	echo -n " Aggressive Scan"
 	prog & nmap -A -iL ip.txt >> aggro.txt
-	kill "$!" && printf "\b "
+	kill "$!" && printf "\b"
 	echo ". . . . . Done"
 	echo -n " OS Scan"
 	prog & nmap -O -p $port -iL ip.txt >> os.txt
-	kill "$!" && printf "\b "
+	kill "$!" && printf "\b"
 	echo ". . . . . . . . Done"
 	echo -n " Standard Scan"
 	prog & nmap -sC -iL ip.txt >> standscan.txt
-	kill "$!" && printf "\b "
+	kill "$!" && printf "\b"
 	echo ". . . . . . Done"
 	echo -n " Vulnerability Scan"
 	prog & nmap -p $port --script vuln -iL ip.txt >> vuln.txt
-	kill "$!" && printf "\b "
+	kill "$!" && printf "\b"
 	echo ". . . Done";
 done
+rm pl.txt
 ################################################################ HTTP Scans
 cat version.txt | grep tcp | grep http | cut -d / -f 1 >> httptmp.txt
 for ps in $(cat httptmp.txt); do
@@ -64,18 +65,19 @@ for ps in $(cat httptmp.txt); do
 		echo " Http Scans Starting"
 		echo -n " Nmap"
 		prog & nmap --script http-enum -T 4 $ip >> http-enum-$ps.txt
-		kill "$!" && print "\b "
+		kill "$!" && printf "\b"
 		echo ". . . . . . . . . . Done" 
 		echo -n " Nikto"
 		prog & nikto -h http://$ip >> nikto-basic-$ps.txt
-		kill "$!" && print "\b "
+		kill "$!" && printf "\b"
 		echo ". . . . . . . . . . Done"
 		echo -n " Dirb"
 		prog & dirb http://$ip/ >> dirb-basic-$ps.txt
-		kill "$!" && print "\b "
+		kill "$!" && printf "\b"
 		echo ". . . . . . . . . . Done"
 	fi;
 done
+rm httptmp.txt
 ################################################################ Find SMB/SMTP 
 for ps in $(cat ports.txt | grep tcp | cut -d / -f 1);do
 	if [ $ps = "25" ] || [ $ps = "465" ] || [ $ps = "587" ] || [ $ps = "2525" ]
@@ -83,7 +85,7 @@ for ps in $(cat ports.txt | grep tcp | cut -d / -f 1);do
 		echo $ps >> smtptemp.txt
 	elif [ $ps = "139" ] || [ $ps = "445" ]
 	then
-		echo $ps >> smbtempt.txt
+		echo $ps >> smbtemp.txt
 	fi;
 done
 ################################################################ SMTP Enum
@@ -97,13 +99,14 @@ then
 		prog & nmap --script smtp-enum-users -p $smtp $ip >> smtp-enum-users.txt
 		kill "$!"
 		prog & nmap --script smbtp-commands -p $smtp $ip >> smtp-commands.txt
-		kill "$!" && printf "\b\b  "
+		kill "$!" && printf "\b\b"
 		echo ". . . . . . . . . . Done";
 	done
 	rm smtptemp.txt
+	rm smtpports.txt
 fi
 ################################################################ SMB Enum
-if [ -e smbtempt.txt ]
+if [ -e smbtemp.txt ]
 then
 	cat smbtemp.txt | xargs | sed -e 's/ /,/g' >> smbports.txt
 	for smb in $(cat smbports.txt);do
@@ -115,17 +118,17 @@ then
 		prog & nmap --script smb-os-discovery -p $smb $ip >> smb-os.txt
 		kill "$!"
 		prog & nmap --script smb-security-mode -p $smb $ip >> smb-security.txt
-		kill "$!" && print "\b\b\b   "
+		kill "$!" && printf "\b\b\b"
 		echo ". . . . . . . . . . Done"
 		echo -n " Enum4linux"
 		prog & enum4linux $ip >> enum4linux.txt
-		kill "$!" && print "\b "
+		kill "$!" && print "\b"
 		echo ". . . . . . . Done";
 	done
 	rm smbtemp.txt
+	rm smbports.txt
 fi
-################################################################ Clean Up
-rm pl.txt
+################################################################ Finish
 echo "###############     COMPLETE     ###############"
 echo "Reminder: UDP port scan was all common ports, not all ports"
 echo "Note: UDP is currently commented OUT"
