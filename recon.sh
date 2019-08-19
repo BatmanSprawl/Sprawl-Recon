@@ -56,7 +56,7 @@ for port in $(cat pl.txt);do
 	echo ". . . Done";
 done
 ################################################################ HTTP Scans
-cat ports.txt | grep tcp | grep http | cut -d / -f 1 >> httptmp.txt
+cat version.txt | grep tcp | grep http | cut -d / -f 1 >> httptmp.txt
 for ps in $(cat httptmp.txt); do
 	if [ $ps != "" ]
 	then
