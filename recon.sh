@@ -24,13 +24,13 @@ echo -n " TCP Ports : "
 prog & nmap -sS -p- -iL ip.txt >> ports.txt
 kill "$!" && printf "\b "
 cat ports.txt | grep tcp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> pl.txt
-print pl.txt
+cat pl.txt
 ################################################################ Get UDP
 #echo -n " UDP Ports : "
 #prog & nmap -sU -iL ip.txt >> udp.txt
 #kill "$!" && printf "\b "
 #cat udp.txt | grep udp | cut -d / -f 1 | xargs | sed -e 's/ /,/g' >> upl.txt
-#print upl.txt
+#cat upl.txt
 ################################################################ Basic Nmap Scans
 for port in $(cat pl.txt);do 
 	echo "     .:TCP Start:.     "
@@ -100,6 +100,7 @@ then
 		kill "$!" && printf "\b\b  "
 		echo ". . . . . . . . . . Done";
 	done
+	rm smtptemp.txt
 fi
 ################################################################ SMB Enum
 if [ -e smbtempt.txt ]
@@ -121,11 +122,10 @@ then
 		kill "$!" && print "\b "
 		echo ". . . . . . . Done";
 	done
+	rm smbtemp.txt
 fi
 ################################################################ Clean Up
 rm pl.txt
-rm smbtemp.txt
-rm smtptemp.txt
 echo "###############     COMPLETE     ###############"
 echo "Reminder: UDP port scan was all common ports, not all ports"
 echo "Note: UDP is currently commented OUT"
